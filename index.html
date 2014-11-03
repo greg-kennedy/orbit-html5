@@ -5,13 +5,29 @@
 <title>Orbit</title>
 <link rel="stylesheet" href="style.css">
 
-<script src="js/orbit.js"></script>
-
 <script>
+// be safe
+"use strict";
+
+// global vars
+var context;
+var canvas;
+
+// Window resize handler
+function init()
+{
+	canvas = document.getElementById("canvas");
+	context = canvas.getContext("2d");
+
+	// Game initialization
+	game_init();
+
+	resize();
+}
+
 function resize()
 {
 	// This function rescales the canvas.
-	canvas = document.getElementById("canvas");
 	canvas.width = window.innerWidth;
 	canvas.height = window.innerHeight;
 }
@@ -20,6 +36,8 @@ window.onload = init;
 window.onresize = resize;
 
 </script>
+
+<script src="js/orbit.js"></script>
 
 </head>
 
