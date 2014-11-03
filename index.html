@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Orbit</title>
+<link rel="stylesheet" href="style.css">
+
+<script src="js/orbit.js" />
+
+<script>
+
+function resize()
+{
+	// This function rescales the canvas.
+	canvas = document.getElementById("canvas");
+	canvas.width = window.innerWidth;
+	canvas.height = window.innerHeight;
+}
+
+window.onload = init;
+window.onresize = resize;
+
+</script>
+</head>
+
+<body>
+	<canvas id="canvas" width="1px" height="1px">
+		Your browser does not support canvas. Please try again with a different browser.
+	</canvas>
+</body>
+
+</html>

@@ -1,0 +1,25 @@
+/* CSS Stylesheet for Orbit */
+
+/* Remove margin and padding settings for all objects */
+*
+{
+  margin: 0;
+  padding: 0;
+}
+
+/* Body: black background, no scrollbar */
+body
+{
+  background: #000000;
+  overflow: hidden;
+}
+
+canvas
+{
+  background: #FFFFFF;
+
+  /* This bit of CSS does absolute centering of the canvas. */
+  top: 0; left: 0; bottom: 0; right: 0;
+  position: absolute;
+  margin: auto;
+}
