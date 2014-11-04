@@ -1,12 +1,23 @@
 // Global variables
 var FPS = 60;
-var warp= 60;
+var warp= 86400;
 var PI2 = 2 * Math.PI;
 
 // camera
+var cam_trans_sticky = 0;
+var cam_rot_sticky = 0;
+
+var mouse_start_x;
+var mouse_start_y;
+var mouse_start_rot;
+var cam_last_x;
+var cam_last_y;
+var cam_last_rot;
+
 var cam_x = 0;
 var cam_y = 0;
-var cam_scale = 0.0000025;
+var cam_rotate = 0;
+var cam_scale = 0.000000001;
 
 function rand(top) {
 	return Math.floor(Math.random() * top);
@@ -34,13 +45,13 @@ function update() {
 				// Attractive force
 				var grav_force = phys_gravitation(o1,o2);
 				// Scale by time-rate
-				grav_force.magnitude /= FPS;
+				grav_force.magnitude *= delta_t;
 				o1.velocity = vector_add(o1.velocity,grav_force);
 			}
 		}
 	}
 
-	// Last step: normalize the universe.  Sun must be kept at 0,0
+	// Last step: normalize the universe.  Sun should be kept at (0,0)
 	for (var i = system.length - 1; i >= 0; i--)
 	{
 		system[i].x -= system[0].x;
@@ -57,9 +68,13 @@ function draw() {
 	context.save();
 
 // Set camera
+	// centers coordinates first
 	context.translate((canvas.width/2),(canvas.height/2));
-	//context.translate(0,(canvas.height/2));
+	// apply scale and rotation
 	context.scale(cam_scale,cam_scale);
+	context.rotate(cam_rotate);
+	context.translate(cam_x, cam_y);
+	// apply camera position
 
 // Starfield
 	//context.fillRect(0, 0, 100000, 100000);
@@ -91,7 +106,7 @@ function draw() {
 		context.save();
 			context.translate(object.x,object.y+object.radius);
 			context.scale(1/cam_scale,1/cam_scale);
-			context.fillText(object.name,0,0);
+			context.fillText(object.name,-2*object.name.length,20);
 		context.restore();
 		//context.fillRect(object.x-object.radius/2,object.y-object.radius/2,object.radius,object.radius);
 	}
@@ -105,11 +120,76 @@ function draw() {
 	//context.fillText("FPS: ",10,50);
 }
 
+function game_zoom(scroll)
+{
+	var wheel = Math.pow(2,-scroll/8);
+	//console.info(wheel);
+	cam_scale *= wheel;
+	return false;
+}
+
 function game_init()
 {
+	// Capture mouse / key events
+	canvas.onmousedown=function(event) {
+		// Clear any previous action
+		cam_trans_sticky = cam_rot_sticky = 0;
+		canvas.style.cursor='auto';
+
+		// Store mouse x/y
+		mouse_last_x = event.clientX;
+		mouse_last_y = event.clientY;
+
+		// Check button and set appropriate tool
+		if (event.button == 0)
+		{
+			cam_trans_sticky=1;
+			cam_last_x = cam_x;
+			cam_last_y = cam_y;
+			mouse_start_x = event.clientX;
+			mouse_start_y = event.clientY;
+			canvas.style.cursor='move';
+		} else if (event.button==1) {
+			cam_rot_sticky=1;
+			cam_last_rot = cam_rotate;
+			mouse_start_rot = Math.atan2(-canvas.height/2 + event.clientY, -canvas.width/2 + event.clientX); 
+			canvas.style.cursor='crosshair';
+		}
+	};
+	canvas.onmouseup=function(event) {
+		canvas.style.cursor='auto';
+		cam_trans_sticky = cam_rot_sticky = 0;
+	};
+	canvas.onmousemove=function(event) {
+		if (cam_trans_sticky)
+		{
+			cam_x = cam_last_x - (mouse_start_x - event.clientX) / cam_scale;
+			cam_y = cam_last_y - (mouse_start_y - event.clientY) / cam_scale;
+		}
+		else if (cam_rot_sticky)
+		{
+			cam_rotate = cam_last_rot - mouse_start_rot + Math.atan2(-canvas.height/2 + event.clientY, -canvas.width/2 + event.clientX); 
+		}
+	};
+
+	canvas.addEventListener('mousewheel', function(event) {
+		game_zoom(event.wheelDelta);
+	});
+
+	canvas.addEventListener('DOMMouseScroll', function(event) {
+		game_zoom(event.detail);
+	});
+
+/*	canvas.addEventListener('mousewheel',function(event){
+		var wheel = event.wheelDelta / 120;
+		console.info(wheel);
+		scale *= wheel;
+		return false;
+	});*/
+
 	// Sets up game loop
 	setInterval(function() {
-	  update();
-	  draw();
+		update();
+		draw();
 	}, 1000/FPS);
 }
