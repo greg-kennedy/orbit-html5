@@ -1,5 +1,6 @@
 // Global variables
-var FPS = 30;
+var FPS = 60;
+var warp= 60;
 var PI2 = 2 * Math.PI;
 
 // camera
@@ -13,13 +14,15 @@ function rand(top) {
 
 function update() {
 	// Update the universe!  Each object interacts with each one below.
+	var delta_t = warp/FPS;
+
 	for (var i = 0; i < system.length; i++)
 	{
 		var o1 = system[i];
 
 		// First: update object's position based on velocity vector
-		o1.x += o1.velocity.magnitude * Math.cos(o1.velocity.angle) / FPS;
-		o1.y += o1.velocity.magnitude * Math.sin(o1.velocity.angle) / FPS;
+		o1.x += o1.velocity.magnitude * Math.cos(o1.velocity.angle) * delta_t;
+		o1.y += o1.velocity.magnitude * Math.sin(o1.velocity.angle) * delta_t;
 
 		for (var j = 0; j < system.length; j++)
 		{
@@ -29,7 +32,10 @@ function update() {
 				var o2 = system[j];
 
 				// Attractive force
-				o1.velocity = vector_add(o1.velocity,phys_gravitation(o1,o2));
+				var grav_force = phys_gravitation(o1,o2);
+				// Scale by time-rate
+				grav_force.magnitude /= FPS;
+				o1.velocity = vector_add(o1.velocity,grav_force);
 			}
 		}
 	}
@@ -63,21 +69,30 @@ function draw() {
 	} */
 
 // Celestial bodies
+	context.strokeStyle = "#022";
 	context.fillStyle = "#FFF";
+	context.font="10px Georgia";
+
 	for (var i = 0; i < system.length; i++)
 	{
 		var object = system[i];
 //console.info("Object.x=" + object.x + ", object.r=" + object.radius);
-		context.fillStyle = "#022";
 		context.beginPath();
 		context.arc(object.x,object.y,10/cam_scale,0,PI2,true);
-		context.fill();
 		context.closePath();
-		context.fillStyle = "#FFF";
+		context.lineWidth=3/cam_scale;
+		context.stroke();
+
 		context.beginPath();
 		context.arc(object.x,object.y,object.radius,0,PI2,true);
 		context.fill();
-		context.closePath();
+
+		// Names under objects
+		context.save();
+			context.translate(object.x,object.y+object.radius);
+			context.scale(1/cam_scale,1/cam_scale);
+			context.fillText(object.name,0,0);
+		context.restore();
 		//context.fillRect(object.x-object.radius/2,object.y-object.radius/2,object.radius,object.radius);
 	}
 
