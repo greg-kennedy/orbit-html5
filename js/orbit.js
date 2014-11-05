@@ -1,5 +1,6 @@
-// Global variables
 var warp= 86400;
+var frameskip = 60;
+// Global variables
 var PI2 = 2 * Math.PI;
 
 var last_now = 0;
@@ -20,36 +21,46 @@ var cam_y = 0;
 var cam_rotate = 0;
 var cam_scale = 0.000000001;
 
-function rand(top) {
+/* function rand(top) {
 	return Math.floor(Math.random() * top);
-}
+} */
 
 function update(delta_t_ms) {
 	// Update the universe!  Each object interacts with each one below.
 	//var delta_t = warp/FPS;
-	delta_t = delta_t_ms * warp / 1000;
+	var delta_t = delta_t_ms * warp / 1000;
 
+	// First: update object's position based on velocity vector
 	for (var i = 0; i < system.length; i++)
 	{
 		var o1 = system[i];
 
-		// First: update object's position based on velocity vector
 		o1.x += o1.velocity.magnitude * Math.cos(o1.velocity.angle) * delta_t;
 		o1.y += o1.velocity.magnitude * Math.sin(o1.velocity.angle) * delta_t;
+	}
 
-		for (var j = 0; j < system.length; j++)
+	// Step 2: each object interacts with all others in system
+	for (var i = 0; i < system.length-1; i++)
+	{
+		var o1 = system[i];
+
+		for (var j = i+1; j < system.length; j++)
 		{
-			if (i != j)
-			{
-				// Next: each object in the system interacts
-				var o2 = system[j];
+			// Next: each object in the system interacts
+			var o2 = system[j];
 
-				// Attractive force
-				var grav_force = phys_gravitation(o1,o2);
-				// Scale by time-rate
-				grav_force.magnitude *= delta_t;
-				o1.velocity = vector_add(o1.velocity,grav_force);
-			}
+			// Attractive force
+			var grav_force = phys_gravitation(o1,o2);
+			// Scale by time-rate
+			grav_force.magnitude *= delta_t;
+
+			// object 1 first: scale by mass, add vector
+			var accel_v = {angle:grav_force.angle, magnitude:grav_force.magnitude / o1.mass};
+			o1.velocity = vector_add(o1.velocity,accel_v);
+
+			// object 2 next: scale by mass, add vector
+			var accel_v = {angle:grav_force.angle, magnitude:grav_force.magnitude / -o2.mass};
+			o2.velocity = vector_add(o2.velocity,accel_v);
 		}
 	}
 
@@ -134,10 +145,12 @@ function draw(delta_t) {
 function tick(now)
 {
 	// Set callback for next animation frame
+	for (var i=0; i<frameskip; i++)
+	{
+		update(1000/60); //delta_t);
+	}
 	requestAnimFrame(tick);
-
 	var delta_t = now - last_now;
-	update(delta_t);
 	draw(delta_t);
 
 	// reset timer

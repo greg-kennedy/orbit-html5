@@ -1,3 +1,4 @@
+// Gravitational constant, in N*m/kg^2
 var G=6.67384e-11;
 
 function phys_gravitation(o1,o2)
@@ -15,12 +16,15 @@ function phys_gravitation(o1,o2)
   var f = G * o1.mass * o2.mass / r2;
 
   // Return vector
-  return {angle:theta,magnitude:(f/o1.mass)};
+  return {angle:theta,magnitude:f};
 }
 
 function phys_distance2(x1,y1,x2,y2)
 {
-  return Math.pow(x2-x1,2) + Math.pow(y2-y1,2);
+  var xdiff = x2-x1;
+  var ydiff = y2-y1;
+
+  return (xdiff * xdiff) + (ydiff * ydiff);
 }
 
 function vector_add(v1,v2)
