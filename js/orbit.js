@@ -1,7 +1,8 @@
 // Global variables
-var FPS = 60;
 var warp= 86400;
 var PI2 = 2 * Math.PI;
+
+var last_now = 0;
 
 // camera
 var cam_trans_sticky = 0;
@@ -23,9 +24,10 @@ function rand(top) {
 	return Math.floor(Math.random() * top);
 }
 
-function update() {
+function update(delta_t_ms) {
 	// Update the universe!  Each object interacts with each one below.
-	var delta_t = warp/FPS;
+	//var delta_t = warp/FPS;
+	delta_t = delta_t_ms * warp / 1000;
 
 	for (var i = 0; i < system.length; i++)
 	{
@@ -59,7 +61,7 @@ function update() {
 	}
 }
 
-function draw() {
+function draw(delta_t) {
 // Clear first: also, resets transform matrix
 	context.setTransform(1, 0, 0, 1, 0, 0);
 	context.clearRect(0, 0, canvas.width, canvas.height);
@@ -72,9 +74,9 @@ function draw() {
 	context.translate((canvas.width/2),(canvas.height/2));
 	// apply scale and rotation
 	context.scale(cam_scale,cam_scale);
-	context.rotate(cam_rotate);
-	context.translate(cam_x, cam_y);
 	// apply camera position
+	context.translate(cam_x, cam_y);
+	context.rotate(cam_rotate);
 
 // Starfield
 	//context.fillRect(0, 0, 100000, 100000);
@@ -82,11 +84,20 @@ function draw() {
 	for (i = 0; i < 500; i ++) {
 		context.fillRect(rand(canvas.width),rand(canvas.height),1,1);
 	} */
-
+	
 // Celestial bodies
 	context.strokeStyle = "#022";
 	context.fillStyle = "#FFF";
+	context.lineWidth=1/cam_scale;
 	context.font="10px Georgia";
+
+	// A LINE
+	context.beginPath();
+	context.moveTo(0,0);
+	context.lineTo(1e20,0);
+	context.stroke();
+
+	context.lineWidth=3/cam_scale;
 
 	for (var i = 0; i < system.length; i++)
 	{
@@ -95,7 +106,6 @@ function draw() {
 		context.beginPath();
 		context.arc(object.x,object.y,10/cam_scale,0,PI2,true);
 		context.closePath();
-		context.lineWidth=3/cam_scale;
 		context.stroke();
 
 		context.beginPath();
@@ -105,6 +115,7 @@ function draw() {
 		// Names under objects
 		context.save();
 			context.translate(object.x,object.y+object.radius);
+			context.rotate(-cam_rotate);
 			context.scale(1/cam_scale,1/cam_scale);
 			context.fillText(object.name,-2*object.name.length,20);
 		context.restore();
@@ -115,9 +126,22 @@ function draw() {
 	context.restore();
 
 // OSD
-	//context.fillStyle = "#7F0";
-	//context.font="20px Georgia";
-	//context.fillText("FPS: ",10,50);
+	context.fillStyle = "#7F0";
+	context.font="20px Georgia";
+	context.fillText("FPS: " + (1000/delta_t),10,50);
+}
+
+function tick(now)
+{
+	// Set callback for next animation frame
+	requestAnimFrame(tick);
+
+	var delta_t = now - last_now;
+	update(delta_t);
+	draw(delta_t);
+
+	// reset timer
+	last_now = now;
 }
 
 function game_zoom(scroll)
@@ -188,8 +212,5 @@ function game_init()
 	});*/
 
 	// Sets up game loop
-	setInterval(function() {
-		update();
-		draw();
-	}, 1000/FPS);
+	tick(0);
 }

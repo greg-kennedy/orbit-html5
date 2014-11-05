@@ -8,3 +8,5 @@ var system = [
  //  { name:"Phobos", type:"solid", mass:1.06e16, radius: 11.2e3, x:249239378e3,y:0,velocity:{angle:Math.PI/2,magnitude:500 }},
  //  { name:"Deimos", type:"solid", mass:2.4e15, radius: 6.1e3, x:249253459e3,y:0,velocity:{angle:Math.PI/2,magnitude:500 }}
 ];
+
+// missing: "argument of pericenter".  In fact most of these should be at pericenter, not apocenter.
