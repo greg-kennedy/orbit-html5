@@ -10,26 +10,57 @@
 "use strict";
 
 // global vars
-var context;
 var canvas;
+var context;
+var menu;
+var menu_context;
 
-// Window resize handler
+var state;
+
+// Initialization for screen and game
 function init()
 {
+	// Main drawing canvas
 	canvas = document.getElementById("canvas");
 	context = canvas.getContext("2d");
 
+	// Right-hand sidebar menu
+	menu = document.getElementById("menu");
+	menu_context = menu.getContext("2d");
+
+	// Menu has a fixed size.
+	//menu.width = 128;
+
+	// Set initial gamestate == load screen
+	state = 0;
+
+	// Asset manager (see assetManager.js)
+	ASSET_MANAGER = new AssetManager();
+
+	// Queue up all the resources we'll need.
+	ASSET_MANAGER.download(['img/logo.png'],function(){stateChange(1);});
+
+	// Fire resize handler
+	resize();
+
 	// Game initialization
 	game_init();
-
-	resize();
 }
 
+// Window resize handler
 function resize()
 {
-	// This function rescales the canvas.
-	canvas.width = window.innerWidth;
+	// This function rescales both canvases.
+	// Set 100& height for both canvases
 	canvas.height = window.innerHeight;
+	menu.height = window.innerHeight;
+
+	// Game canvas width
+	canvas.width = window.innerWidth - menu.width;
+
+	// redraw as necessary
+	draw(1);
+	menu_draw();
 }
 
 window.onload = init;
@@ -37,18 +68,27 @@ window.onresize = resize;
 
 </script>
 
+<script src="js/assetManager.js"></script>
+
 <script src="js/requestAnimationFrame.js"></script>
 
 <script src="js/physics.js"></script>
 <script src="js/system.js"></script>
 <script src="js/orbit.js"></script>
 
+<script src="js/menu.js"></script>
+
 </head>
 
 <body>
-	<canvas id="canvas" width="1px" height="1px">
-		Your browser does not support canvas. Please try again with a different browser.
-	</canvas>
+	<div id="wrap">
+		<canvas id="canvas">
+			Your browser does not support canvas. Please try again with a different browser.
+		</canvas>
+		<canvas id="menu" width="128px">
+			Your browser does not support canvas. Please try again with a different browser.
+		</canvas>
+	</div>
 </body>
 
 </html>

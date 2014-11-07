@@ -144,23 +144,33 @@ function draw(delta_t) {
 
 function tick(now)
 {
-	// Set callback for next animation frame
-	for (var i=0; i<frameskip; i++)
+	if (last_now != 0 && state != 0)
 	{
-		update(1000/60); //delta_t);
+		for (var i=0; i<frameskip; i++)
+		{
+			update(1000/60); //delta_t);
+		}
+		var delta_t = now - last_now;
+		draw(delta_t);
 	}
+
+	// Set callback for next animation frame
 	requestAnimFrame(tick);
-	var delta_t = now - last_now;
-	draw(delta_t);
 
 	// reset timer
 	last_now = now;
 }
 
+function stateChange(new_state)
+{
+	// redraw menu
+	state=new_state;
+	menu_init();
+}
+
 function game_zoom(scroll)
 {
 	var wheel = Math.pow(2,-scroll/8);
-	//console.info(wheel);
 	cam_scale *= wheel;
 	return false;
 }
@@ -209,20 +219,16 @@ function game_init()
 		}
 	};
 
+	// Zoom canvas with mouse wheel.  First item is for IE/Chrome, second for FF
 	canvas.addEventListener('mousewheel', function(event) {
-		game_zoom(event.wheelDelta);
+		game_zoom(event.wheelDelta/-40);
 	});
-
 	canvas.addEventListener('DOMMouseScroll', function(event) {
 		game_zoom(event.detail);
 	});
 
-/*	canvas.addEventListener('mousewheel',function(event){
-		var wheel = event.wheelDelta / 120;
-		console.info(wheel);
-		scale *= wheel;
-		return false;
-	});*/
+	// Init the menu too
+//	menu_init();
 
 	// Sets up game loop
 	tick(0);
