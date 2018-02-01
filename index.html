@@ -9,13 +9,22 @@
 // be safe
 "use strict";
 
-// global vars
+// Global vars usable at init-time
+// Gamestate.
+var stateEnum = {"loading":1, "running":2};
+// Set initial gamestate == load screen
+var state = stateEnum.loading;
+
+// global vars needing initialization after page load
+//	Main drawing canvas element
 var canvas;
+//	2d context of canvas
 var context;
+//	Menu canvas (right-hand side)
 var menu;
+//	2d context for menu canvas
 var menu_context;
 
-var state;
 
 // Initialization for screen and game
 function init()
@@ -27,12 +36,6 @@ function init()
 	// Right-hand sidebar menu
 	menu = document.getElementById("menu");
 	menu_context = menu.getContext("2d");
-
-	// Menu has a fixed size.
-	//menu.width = 128;
-
-	// Set initial gamestate == load screen
-	state = 0;
 
 	// Asset manager (see assetManager.js)
 	ASSET_MANAGER = new AssetManager();
@@ -51,10 +54,12 @@ function init()
 function resize()
 {
 	// This function rescales both canvases.
-	// Set 100& height for both canvases
+	// Set 100% height for both canvases
 	canvas.height = window.innerHeight;
 	menu.height = window.innerHeight;
 
+	// Menu has a fixed size.
+	//menu.width = 128;
 	// Game canvas width
 	canvas.width = window.innerWidth - menu.width;
 

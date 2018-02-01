@@ -1,5 +1,5 @@
 var warp= 86400;
-var frameskip = 60;
+var frameskip = 1; //60;
 // Global variables
 var PI2 = 2 * Math.PI;
 
